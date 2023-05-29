@@ -796,6 +796,7 @@ func Store(cells []statisticsAnalyse.Cell, conf *config.Config) int {
 		if err != nil {
 			return 0
 		}
+
 		return 0
 	}
 	UploadSeconds = time.Now().Unix()
