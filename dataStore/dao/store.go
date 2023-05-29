@@ -652,24 +652,8 @@ func DoTransferOther(curTime int64, hostName string, otherServerIP []string, oth
 		beginTime := time.Now().UnixNano()
 		//初始化SSH连接配置
 		cliConf := new(ClientConfig)
-		//defer func(sftpClient *sftp.Client) {
-		//	err := sftpClient.Close()
-		//	if err != nil {
-		//		fmt.Println("StoreJsonResult sftpClient.Close()", err)
-		//	}
-		//}(cliConf.sftpClient)
 		status, err := cliConf.CreateClient(otherServerIP[i], otherServerPort[i], "root", otherServerPass[i], false)
-		defer func(cliConf *ClientConfig) {
-			err := cliConf.sftpClient.Close()
-			if err != nil {
-				//fmt.Println("SFTP CLOSE", err)
-			}
-			err = cliConf.sshClient.Close()
-			if err != nil {
-				//fmt.Println("SSH CLOSE", err)
-			}
-			cliConf = nil
-		}(cliConf)
+
 		//连接失败进行重试直到成功
 		for status != 0 {
 			if status == 1 {
@@ -679,6 +663,20 @@ func DoTransferOther(curTime int64, hostName string, otherServerIP []string, oth
 			}
 			status, err = cliConf.CreateClient(otherServerIP[i], otherServerPort[i], "root", otherServerPass[i], false)
 		}
+		defer func(cliConf *ClientConfig) {
+			if cliConf == nil {
+				logger.Error("Client is nil")
+			}
+			err := cliConf.sftpClient.Close()
+			if err != nil {
+				logger.Error("SFTP Client close error.", zap.Error(err))
+			}
+			err = cliConf.sshClient.Close()
+			if err != nil {
+				logger.Error("SSH Client close error.", zap.Error(err))
+			}
+			cliConf = nil
+		}(cliConf)
 		//连接成功后开始文件传输
 		status, err = cliConf.Upload(dataFile, "/root/data/"+hostName+"_"+strconv.FormatInt(curTime, 10)+".json.zlib", false)
 		for status != 0 {

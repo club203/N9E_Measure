@@ -36,7 +36,7 @@ func StartPing(conf *config.Config, confChan chan config.Config) {
 	//for i := range res {
 	//	res[i] = -9
 	//}
-	curTime := time.Now().Unix()
+	curTime := time.Now().UnixMilli()
 	TsFlag = curTime
 	// 顺序打乱 降低流量汇集概率，
 	/*zm

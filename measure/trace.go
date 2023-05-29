@@ -114,7 +114,7 @@ func traceIP(goId int) {
 		ip := v.ip
 		//var hostId = 1
 		//netDataMap.Store(netId, netPingData)
-		startTimestamp := time.Now().Unix()
+		startTimestamp := time.Now().UnixMilli()
 		var resultMap map[string][]string
 		resultMap = map[string][]string{}
 		start := time.Now()
@@ -275,7 +275,7 @@ func StartTrace(conf *config.Config) {
 		//if !win10 {
 		//	listening.ServerListen(conf) //开启服务器监听
 		//}
-		start := time.Now().Unix()
+		start := time.Now().UnixMilli()
 		logger.Info("测量开始", zap.Int("轮数", roundCnt))
 		confChan := make(chan config.Config, 10) //带缓存的channel，无缓存的channel的读写都将进行堵塞
 		//config.DynamicUpdateConfig(configurationFilename, cfgFilename, confChan) //Linux赋权限和更新配置
@@ -307,7 +307,7 @@ func StartTrace(conf *config.Config) {
 				cnt := IPRoundCnt{
 					ip:       node.Address,
 					roundCnt: roundCnt,
-					ttl:      ttl,
+					ttl:      64,
 				}
 				traceAllIpChan <- cnt
 			}
@@ -330,7 +330,7 @@ func StartTrace(conf *config.Config) {
 		//time.Sleep(time.Duration(10) * time.Second)
 		roundCnt++
 		now := time.Now()
-		cost := now.Unix() - start
+		cost := now.UnixMilli() - start
 		// 不sleep 一直trace
 		if expectedPeriodMinutes != 0 {
 			sleepSecond := expectedPeriodMinutes*60 - cost
@@ -469,7 +469,7 @@ func timerSave() {
 			panic(err)
 		}
 		var rttResult = string(tmp)
-		rttResult = ip + "\t" + rttResult + "\t" + fmt.Sprintf("%d", netPingData.SentAllPktTs.Unix()) + "\n"
+		rttResult = ip + "\t" + rttResult + "\t" + fmt.Sprintf("%d", netPingData.SentAllPktTs.UnixMilli()) + "\n"
 		//写入文件
 		storeFile.SavePingData(ip, rttResult, netPingData.Round)
 		logger.Debug("测量结果", zap.String("trace", rttResult))
