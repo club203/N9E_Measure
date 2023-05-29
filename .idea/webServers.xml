@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="5aca69b7-ba1f-4a50-906a-92400805456c" name="BJ">
+        <fileTransfer accessType="SFTP" host="103.228.162.74" port="22" sshConfigId="12a518f9-673d-411d-9fc4-92b62a76c642" sshConfig="root@103.228.162.74:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="82c7d771-ab7c-427e-a132-7dee62797aa6" name="BJ-DBA">
+        <fileTransfer accessType="SFTP" host="106.3.133.4" port="22" sshConfigId="2760c7a9-dedd-4690-bb2c-b69cf6aefde0" sshConfig="root@106.3.133.4:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

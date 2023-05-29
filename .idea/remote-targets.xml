@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteTargetsManager">
+    <targets>
+      <target name="root@106.3.133.4:22" type="ssh/sftp" uuid="0c25919e-6bbc-4f6c-9be7-d51e70cc3258">
+        <config>
+          <option name="projectRootOnTarget" value="/root/Traceroute" />
+          <option name="serverName" value="root@106.3.133.4:22 password" />
+          <option name="useRsync" value="true" />
+        </config>
+        <ContributedStateBase type="GoLanguageRuntime">
+          <config>
+            <option name="goPath" value="/root/oldwu" />
+            <option name="goRoot" value="/usr/local/go/bin/go" />
+            <option name="goVersion" value="go1.18 linux/amd64" />
+          </config>
+        </ContributedStateBase>
+      </target>
+    </targets>
+  </component>
+</project>

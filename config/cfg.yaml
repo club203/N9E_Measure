@@ -1,0 +1,8 @@
+address: 127.0.0.1
+alias: LOCAL
+periodPacketNum: 50
+perPacketIntervalMs: 10
+perPacketIntervalUs: 0
+periodNum: 1
+periodMs: 0
+size: 64
