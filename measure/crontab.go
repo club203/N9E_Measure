@@ -154,7 +154,7 @@ func ConvertResultToCells(message *protocol.Message, res []float64) []statistics
 	initDataType(typeOfData, typeOfDataOrm)           //初始化数据类型
 	cells := make([]statisticsAnalyse.Cell, len(res)) //后序给 icmp ttl预留一个位置
 	//格林威治时间1970年01月01日00时00分00秒起到此时此刻的格林威治时间（假如是00点）的【总秒数
-	ts := time.Now().Unix()
+	ts := time.Now().UnixMilli()
 	//返回将s中前n个不重叠old子串都替换为new的新字符串，如果n<0会替换所有old子串。
 	message.Alias = strings.Replace(message.Alias, "_", ".", -1)
 	//packetSize := message.Size

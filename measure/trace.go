@@ -275,7 +275,7 @@ func StartTrace(conf *config.Config) {
 		//if !win10 {
 		//	listening.ServerListen(conf) //开启服务器监听
 		//}
-		start := time.Now().UnixMilli()
+		start := time.Now().Unix()
 		logger.Info("测量开始", zap.Int("轮数", roundCnt))
 		confChan := make(chan config.Config, 10) //带缓存的channel，无缓存的channel的读写都将进行堵塞
 		//config.DynamicUpdateConfig(configurationFilename, cfgFilename, confChan) //Linux赋权限和更新配置
@@ -330,7 +330,7 @@ func StartTrace(conf *config.Config) {
 		//time.Sleep(time.Duration(10) * time.Second)
 		roundCnt++
 		now := time.Now()
-		cost := now.UnixMilli() - start
+		cost := now.Unix() - start
 		// 不sleep 一直trace
 		if expectedPeriodMinutes != 0 {
 			sleepSecond := expectedPeriodMinutes*60 - cost

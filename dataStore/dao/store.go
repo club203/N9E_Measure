@@ -907,7 +907,7 @@ func sep2MultiTable(cells []statisticsAnalyse.Cell, conf *config.Config) (dataMa
 			DstIp:      cell.DestIp,
 		}
 		data := measureChange.Convert(metric)
-		data.TimeStamp = strconv.FormatInt(time.Now().Unix(), 10)
+		data.TimeStamp = strconv.FormatInt(time.Now().UnixMilli(), 10)
 		if data.DesIp == strings.Split(conf.Data.MysqlAddress, ":")[0] {
 			if data.DesName == "proc.icmp.BJ.DB.rtt.avg" {
 				BJValue[0] = data.Value
@@ -949,4 +949,9 @@ func sep2MultiTable(cells []statisticsAnalyse.Cell, conf *config.Config) (dataMa
 		dataMap[tableName] = append(dataMap[tableName], data)
 	}
 	return
+}
+
+func Sep2MultiTable(cells []statisticsAnalyse.Cell, conf *config.Config) (dataMap map[string][]*measureChange.Data, tableNameSlice []string) {
+	// 直接make，永远不要返回nil
+	return sep2MultiTable(cells, conf)
 }

@@ -31,7 +31,7 @@ type Data struct {
 func (d *Data) TableName() string {
 	unix := d.DataModel.TimeStamp                 //string
 	unixTime, _ := strconv.ParseInt(unix, 10, 64) //int64
-	timeStr := time.Unix(unixTime, 0).Local()     //string
+	timeStr := time.UnixMilli(unixTime).Local()   //string
 	tail := fmt.Sprintf("%04d%02d%02d", timeStr.Year(), timeStr.Month(), timeStr.Day())
 	return fmt.Sprintf("%s_%s", d.DataType, tail)
 }
