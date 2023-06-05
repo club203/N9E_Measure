@@ -717,10 +717,12 @@ func AppendFile(filePath string, content string) (err error) {
 	}(file)
 	//写入文件时，使用带缓存的 *Writer
 	write := bufio.NewWriter(file)
+	content += strconv.FormatInt(time.Now().Unix(), 10) + "\t"
 	content += strconv.FormatInt(SshBuild, 10) + "\t" + strconv.Itoa(SshBuildFailTimes) + "\t"
 	content += strconv.FormatInt(SftpBuild, 10) + "\t" + strconv.Itoa(SftpBuildFailTimes) + "\t"
 	content += strconv.FormatInt(UploadBuild, 10) + "\t" + strconv.Itoa(UploadBuildFailTimes) + "\t"
 	content += strconv.FormatInt(Upload, 10) + "\t" + strconv.Itoa(UploadFailTimes) + "\t"
+	content += strconv.Itoa(FileSize)
 
 	for i := 0; i < 15; i++ {
 		content = content + "\t" + BJValue[i]

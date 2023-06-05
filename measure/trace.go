@@ -53,9 +53,16 @@ type traceData struct {
 }
 
 type IPRoundCnt struct {
-	ip       string
-	roundCnt int
-	ttl      int
+	ip         string
+	roundCnt   int
+	ttl        int
+	packetSize int
+}
+
+type TraceMeta struct {
+	ip   string
+	ttl  int
+	size int
 }
 
 func initTracer(nTracer int) {
@@ -172,7 +179,16 @@ func traceIP(goId int) {
 			}
 			var traceResult = string(tmp)
 			hopCount := len(resultMap[ip])
-			traceResult = ip + ":" + strconv.Itoa(hopCount) + "\t" + traceResult + "\t" + fmt.Sprintf("%d", startTimestamp) + "\n"
+			meta := TraceMeta{
+				ip:   ip,
+				ttl:  hopCount,
+				size: v.packetSize,
+			}
+			metaInfo, err := json.Marshal(meta)
+			if err != nil {
+				panic(err)
+			}
+			traceResult = string(metaInfo) + "\t" + traceResult + "\t" + fmt.Sprintf("%d", startTimestamp) + "\n"
 			//logger.Debug(netId + ".0 TraceRoute done.")
 			// 可以优化成只有管道+单个协程
 			//todo 装配数据对象
@@ -305,9 +321,10 @@ func StartTrace(conf *config.Config) {
 			}
 			if node.Address != cfg.Data.Hostname {
 				cnt := IPRoundCnt{
-					ip:       node.Address,
-					roundCnt: roundCnt,
-					ttl:      64,
+					ip:         node.Address,
+					roundCnt:   roundCnt,
+					ttl:        64,
+					packetSize: node.Size,
 				}
 				traceAllIpChan <- cnt
 			}

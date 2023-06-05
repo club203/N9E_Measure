@@ -50,7 +50,7 @@ func PushDataV3(Data []statisticsAnalyse.Cell) (err error) {
 		metric[i] = &MetricValue{
 			Endpoint:     cell.Endpoint,
 			Metric:       cell.Metric,
-			Timestamp:    cell.Timestamp,
+			Timestamp:    time.UnixMilli(cell.Timestamp).Unix(),
 			Step:         cell.Step,
 			ValueUntyped: cell.Value,
 			Tags:         cell.Tags,
