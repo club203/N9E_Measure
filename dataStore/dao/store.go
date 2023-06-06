@@ -772,7 +772,7 @@ func Store(cells []statisticsAnalyse.Cell, conf *config.Config) int {
 	otherServerIP, otherServerPort, otherServerPass := transferOtherServer()
 	failTimes, spendTimes, err := DoTransferOther(curTime, conf.Data.Hostname, otherServerIP, otherServerPort, otherServerPass)
 
-	if err == nil {
+	if err == nil && len(failTimes) > 0 {
 		failString := "OtherServerFailTimes:" + strconv.Itoa(failTimes[0])
 		spendString := "OtherServerSpendTimes:" + strconv.FormatInt(spendTimes[0], 10)
 		for i := 1; i < len(failTimes); i++ {
@@ -784,7 +784,8 @@ func Store(cells []statisticsAnalyse.Cell, conf *config.Config) int {
 		Detail += failString
 		Detail += spendString
 	} else {
-		fmt.Println(err)
+		Detail += "OtherServerFailTimes:-1;"
+		Detail += "OtherServerSpendTimes:-1;"
 	}
 	err = StoreJsonResult(curTime, conf.Data.Hostname, "106.3.133.5", 60708, "1000lgf,wchql")
 	if err == nil {
