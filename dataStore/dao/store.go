@@ -9,6 +9,7 @@ import (
 	"bufio"
 	"bytes"
 	"compress/zlib"
+	"context"
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
@@ -648,55 +649,75 @@ func DoTransferOther(curTime int64, hostName string, otherServerIP []string, oth
 	failTimes := make([]int, len(otherServerIP))    //重试次数
 	spendTimes := make([]int64, len(otherServerIP)) //花费时间
 	for i := 0; i < len(otherServerIP); i++ {
-		failInThis := 0
-		beginTime := time.Now().UnixNano()
-		//初始化SSH连接配置
-		cliConf := new(ClientConfig)
-		status, err := cliConf.CreateClient(otherServerIP[i], otherServerPort[i], "root", otherServerPass[i], false)
+		// 创建一个带有取消能力的context，超时时间为1分钟
+		ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+		// 创建一个用于通知goroutine完成的通道
+		done := make(chan struct{})
+		// 启动goroutine执行函数
+		go func(i int) {
+			defer cancel()
+			failInThis := 0
+			beginTime := time.Now().UnixNano()
+			//初始化SSH连接配置
+			cliConf := new(ClientConfig)
+			status, err := cliConf.CreateClient(otherServerIP[i], otherServerPort[i], "root", otherServerPass[i], false)
 
-		//连接失败进行重试直到成功
-		for status != 0 {
-			if status == 1 {
-				failInThis++
-			} else {
-				failInThis++
+			//连接失败进行重试直到成功
+			for status != 0 {
+				if status == 1 {
+					failInThis++
+				} else {
+					failInThis++
+				}
+				status, err = cliConf.CreateClient(otherServerIP[i], otherServerPort[i], "root", otherServerPass[i], false)
 			}
-			status, err = cliConf.CreateClient(otherServerIP[i], otherServerPort[i], "root", otherServerPass[i], false)
-		}
-		defer func(cliConf *ClientConfig) {
-			if cliConf == nil {
-				logger.Error("Client is nil")
-			}
-			err := cliConf.sftpClient.Close()
-			if err != nil {
-				logger.Error("SFTP Client close error.", zap.Error(err))
-			}
-			err = cliConf.sshClient.Close()
-			if err != nil {
-				logger.Error("SSH Client close error.", zap.Error(err))
-			}
-			cliConf = nil
-		}(cliConf)
-		//连接成功后开始文件传输
-		status, err = cliConf.Upload(dataFile, "/root/data/"+hostName+"_"+strconv.FormatInt(curTime, 10)+".json.zlib", false)
-		for status != 0 {
-			//传输超时时进行失败重试
-			if status == 3 {
-				return nil, nil, err
-			} else if status == 1 {
-				failInThis++
-			} else if status == 2 {
-				failInThis++
-			}
+			defer func(cliConf *ClientConfig) {
+				if cliConf == nil {
+					logger.Error("Client is nil")
+				}
+				err := cliConf.sftpClient.Close()
+				if err != nil {
+					logger.Error("SFTP Client close error.", zap.Error(err))
+				}
+				err = cliConf.sshClient.Close()
+				if err != nil {
+					logger.Error("SSH Client close error.", zap.Error(err))
+				}
+				cliConf = nil
+			}(cliConf)
+			//连接成功后开始文件传输
 			status, err = cliConf.Upload(dataFile, "/root/data/"+hostName+"_"+strconv.FormatInt(curTime, 10)+".json.zlib", false)
-		}
+			for status != 0 {
+				//传输超时时进行失败重试
+				if status == 3 {
+					done <- struct{}{}
+					return
+				} else if status == 1 {
+					failInThis++
+				} else if status == 2 {
+					failInThis++
+				}
+				status, err = cliConf.Upload(dataFile, "/root/data/"+hostName+"_"+strconv.FormatInt(curTime, 10)+".json.zlib", false)
+			}
 
-		endTime := time.Now().UnixNano()
-		if err != nil {
-			return nil, nil, err
+			endTime := time.Now().UnixNano()
+			if err != nil {
+				done <- struct{}{}
+				return
+			}
+			failTimes[i] = failInThis
+			spendTimes[i] = endTime - beginTime
+
+			done <- struct{}{} // 通知完成
+		}(i)
+		// 等待函数执行完成或超时
+		select {
+		case <-done:
+			// fmt.Println("函数执行完成")
+		case <-ctx.Done():
+			// fmt.Println("函数运行超时")
+			cancel() // 超时时取消context
 		}
-		failTimes[i] = failInThis
-		spendTimes[i] = endTime - beginTime
 	}
 	return failTimes, spendTimes, nil
 }
